@@ -40,13 +40,13 @@ def save(book_id: str) -> None:
             = status_soup.find_all("td")
     upload_date = upload_date_soup.text
     matcher = re.match('.*([0-9]+)件.*', messages_soup.text, flags=re.DOTALL)
-    messages = matcher.groups()[0]
+    messages = matcher.groups()[0] if (not matcher is None) else -1
     matcher = re.match('.*([0-9]+)件.*', reviews_soup.text, flags=re.DOTALL)
-    reviews = matcher.groups()[0]
+    reviews = matcher.groups()[0] if (not matcher is None) else -1
     matcher = re.match('.*([0-9]+)件.*', bookmarks.text)
-    bookmarks = matcher.groups()[0]
+    bookmarks = matcher.groups()[0] if (not matcher is None) else -1
     matcher = re.match('.*([0-9]+)pt.*', total_point.text)
-    total_point = matcher.groups()[0]
+    total_point = matcher.groups()[0] if (not matcher is None) else -1
 
     with open(os.path.join(SAVEDIR, "{}.json".format(book_id)), "w+") as f:
         json.dump({
@@ -59,7 +59,6 @@ def save(book_id: str) -> None:
             "bookmarks": bookmarks,
             "total_point": total_point
         }, f)
-
 
 for major_code in ["c", "d"]:
     for minor_code in string.ascii_lowercase:
