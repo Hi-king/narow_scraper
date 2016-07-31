@@ -22,7 +22,7 @@ def save(book_id: str) -> None:
     info_soup = soup.find("table", {"id": "noveltable1"})  # type: BeautifulSoup
     if info_soup is None:  # R18
         return
-    info_list = list(info_soup.find_all("tr")) # type: List[BeautifulSoup]
+    info_list = list(info_soup.find_all("tr"))  # type: List[BeautifulSoup]
     summary_line_soup = info_list[0]
     genre_line_soup = info_list[-1]
     summary = summary_line_soup.find("td").text
@@ -30,11 +30,34 @@ def save(book_id: str) -> None:
     matcher = re.match('(.*)〔(.*)〕', genre)
     genre_small, genre_large = matcher.groups()
 
+    status_soup = soup.find("table", {"id": "noveltable2"})  # type: BeautifulSoup
+    status_soups = status_soup.find_all("td") # type: List[BeautifulSoup]
+    if len(status_soups) == 8:
+        upload_date_soup, messages_soup, reviews_soup, bookmarks, total_point, points, public_satus, characters \
+            = status_soup.find_all("td")
+    elif len(status_soups) == 9:
+        upload_date_soup, update_date_soup, messages_soup, reviews_soup, bookmarks, total_point, points, public_satus, characters \
+            = status_soup.find_all("td")
+    upload_date = upload_date_soup.text
+    matcher = re.match('.*([0-9]+)件.*', messages_soup.text, flags=re.DOTALL)
+    messages = matcher.groups()[0]
+    matcher = re.match('.*([0-9]+)件.*', reviews_soup.text, flags=re.DOTALL)
+    reviews = matcher.groups()[0]
+    matcher = re.match('.*([0-9]+)件.*', bookmarks.text)
+    bookmarks = matcher.groups()[0]
+    matcher = re.match('.*([0-9]+)pt.*', total_point.text)
+    total_point = matcher.groups()[0]
+
     with open(os.path.join(SAVEDIR, "{}.json".format(book_id)), "w+") as f:
         json.dump({
             "genre_large": genre_large,
             "genre_small": genre_small,
-            "summary": summary
+            "summary": summary,
+            "upload_date": upload_date,
+            "messages": messages,
+            "reviews": reviews,
+            "bookmarks": bookmarks,
+            "total_point": total_point
         }, f)
 
 
