@@ -4,16 +4,26 @@ import chainer
 
 
 class FeatureWordModel(chainer.Chain):
-    def __init__(self, vocab_size, midsize):
-        super(FeatureWordModel, self).__init__(
-            word_embed=chainer.functions.EmbedID(vocab_size, midsize),
-            lstm0=chainer.links.connection.lstm.LSTM(midsize, midsize),
-            lstm1=chainer.links.connection.lstm.LSTM(midsize, midsize),
-            word_out_layer=chainer.functions.Linear(midsize, vocab_size),
-        )
+    def __init__(self, vocab_size, midsize, num_lstm_layer=3):
+        if num_lstm_layer == 2:
+            super(FeatureWordModel, self).__init__(
+                word_embed=chainer.functions.EmbedID(vocab_size, midsize),
+                lstm0=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                lstm1=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                word_out_layer=chainer.functions.Linear(midsize, vocab_size),
+            )
+        elif num_lstm_layer == 3:
+            super(FeatureWordModel, self).__init__(
+                word_embed=chainer.functions.EmbedID(vocab_size, midsize),
+                lstm0=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                lstm1=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                word_out_layer=chainer.functions.Linear(midsize, vocab_size),
+            )
+        else:
+            raise Exception("invalid num_lstm_layer")
 
-    def predict_word(self, x):
-        word_predicted = self._forward(x)
+    def predict_word_probability(self, x):
+        word_predicted = chainer.functions.softmax(self._forward(x))
         return word_predicted
 
     def loss_predict_word(self, x, t):

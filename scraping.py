@@ -5,12 +5,12 @@ import re
 import urllib.error
 import urllib.request
 import string
+import glob
 
 from bs4 import BeautifulSoup
 
 ROOTDIR = os.path.dirname(__file__)
 SAVEDIR = os.path.join(ROOTDIR, "dataset")
-
 
 def save(book_id: str) -> None:
     url = "http://ncode.syosetu.com/novelview/infotop/ncode/{}/".format(book_id)
@@ -62,6 +62,8 @@ def save(book_id: str) -> None:
 
 for major_code in ["c", "d"]:
     for minor_code in string.ascii_lowercase:
+        if len(glob.glob(os.path.join(SAVEDIR, "n*{}{}.json".format(major_code, minor_code)))) > 0:
+            continue
         for i in range(10000):
             print("n{:04}{}{}".format(i, major_code, minor_code))
             save("n{:04}{}{}".format(i, major_code, minor_code))
