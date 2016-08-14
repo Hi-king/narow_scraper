@@ -17,6 +17,16 @@ class FeatureWordModel(chainer.Chain):
                 word_embed=chainer.functions.EmbedID(vocab_size, midsize),
                 lstm0=chainer.links.connection.lstm.LSTM(midsize, midsize),
                 lstm1=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                lstm2=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                word_out_layer=chainer.functions.Linear(midsize, vocab_size),
+            )
+        elif num_lstm_layer == 4:
+            super(FeatureWordModel, self).__init__(
+                word_embed=chainer.functions.EmbedID(vocab_size, midsize),
+                lstm0=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                lstm1=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                lstm2=chainer.links.connection.lstm.LSTM(midsize, midsize),
+                lstm3=chainer.links.connection.lstm.LSTM(midsize, midsize),
                 word_out_layer=chainer.functions.Linear(midsize, vocab_size),
             )
         else:
@@ -39,6 +49,8 @@ class FeatureWordModel(chainer.Chain):
             h = self.lstm1(h)
         if hasattr(self, "lstm2"):
             h = self.lstm2(h)
+        if hasattr(self, "lstm3"):
+            h = self.lstm3(h)
         word = self.word_out_layer(h)
         return word
 
@@ -48,4 +60,6 @@ class FeatureWordModel(chainer.Chain):
         if hasattr(self, "lstm1"):
             self.lstm1.reset_state()
         if hasattr(self, "lstm2"):
-            self.lstm1.reset_state()
+            self.lstm2.reset_state()
+        if hasattr(self, "lstm3"):
+            self.lstm3.reset_state()

@@ -16,13 +16,13 @@ VOCAB_SIZE = 3000
 MID_SIZE = 100
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--gpu", type=int, default=-1)
 parser.add_argument("model_path")
 parser.add_argument("converter_path")
+parser.add_argument("--num_lstm_layer", type=int, default=2)
+parser.add_argument("--mid_size", type=int, default=100)
 args = parser.parse_args()
 
-
-model = narow_generator.model.FeatureWordModel(vocab_size=VOCAB_SIZE+2, midsize=MID_SIZE)
+model = narow_generator.model.FeatureWordModel(vocab_size=VOCAB_SIZE + 3, midsize=args.mid_size, num_lstm_layer=args.num_lstm_layer)
 chainer.serializers.load_hdf5(args.model_path, model)
 
 id_generator = None # type: narow_generator.io.IdConverter
@@ -38,5 +38,7 @@ for i in range(1000):
     last_word = numpy.random.choice(list(range(word_probabilities.shape[0])), p=word_probabilities/numpy.sum(word_probabilities))
     if last_word == VOCAB_SIZE:
         sys.stdout.write("*")
+    elif last_word == VOCAB_SIZE+2:
+        break
     else:
         sys.stdout.write(id_generator.inverse(last_word))

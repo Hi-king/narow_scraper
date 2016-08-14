@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--gpu", type=int, default=-1)
 parser.add_argument("--num_lstm_layer", type=int, default=2)
 parser.add_argument("--mid_size", type=int, default=100)
+parser.add_argument("--no_normalization", dest="normalization", action="store_false")
 args = parser.parse_args()
 
 sys.path.append(ROOTDIR)
@@ -42,7 +43,7 @@ def data_loader():
                         with open(filepath) as f:
                             yield json.load(f)
 
-model = narow_generator.model.FeatureWordModel(vocab_size=VOCAB_SIZE + 3, midsize=args.mid_size)
+model = narow_generator.model.FeatureWordModel(vocab_size=VOCAB_SIZE + 3, midsize=args.mid_size, num_lstm_layer=args.num_lstm_layer)
 logging.basicConfig(filename=os.path.join(MODELDIR, "{}_log.txt".format(id(model))), level=logging.DEBUG)
 console = logging.StreamHandler()
 logging.getLogger('').addHandler(console)
@@ -68,7 +69,8 @@ for i, data in enumerate(data_loader()):
             chainer.Variable(target_array[character_index:character_index+1]),
             chainer.Variable(target_array[character_index + 1:character_index+2]))
         total_loss += loss
-        total_loss /= len(target)
+        if args.normalization:
+            total_loss /= len(target)
     logging.info("total_loss: {}".format(total_loss.data))
     optimizer.zero_grads()
     total_loss.backward()
